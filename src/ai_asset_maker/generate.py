@@ -29,7 +29,11 @@ def _prompt_slug(prompt: str) -> str:
 
 def _build_pipeline(model_path: str, device: str, fp16: bool) -> StableDiffusionPipeline:
     dtype = torch.float16 if fp16 else torch.float32
-    pipe = StableDiffusionPipeline.from_pretrained(model_path, torch_dtype=dtype)
+    path = Path(model_path)
+    if path.is_file():
+        pipe = StableDiffusionPipeline.from_single_file(str(path), torch_dtype=dtype)
+    else:
+        pipe = StableDiffusionPipeline.from_pretrained(model_path, torch_dtype=dtype)
     pipe = pipe.to(device)
     if device == "cuda":
         pipe.enable_attention_slicing()
